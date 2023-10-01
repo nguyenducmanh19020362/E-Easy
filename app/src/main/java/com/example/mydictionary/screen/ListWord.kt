@@ -5,6 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -24,9 +26,10 @@ import com.example.mydictionary.R
 import com.example.mydictionary.ScreenSizes
 import com.example.mydictionary.TextSpeech
 import com.example.mydictionary.database.table.Word
+import com.example.mydictionary.screen.setting.Item
 
 @Composable
-fun ListWord(listWords: List<Word>){
+fun ListWord(listWords: List<Word>, changeItem: (Item) -> Unit, changeWord: (Word) -> Unit, changeState: (Boolean) -> Unit){
     Box(
         modifier = Modifier
             .height(ScreenSizes.height().dp * 2 / 3)
@@ -44,7 +47,7 @@ fun ListWord(listWords: List<Word>){
                 ) {
                     Box(modifier = Modifier.clickable {
                     }) {
-                        ShowWord(word = word)
+                        ShowWord(word = word, changeItem, changeWord, changeState)
                     }
                 }
                 Spacer(modifier = Modifier.height(10.dp))
@@ -57,12 +60,13 @@ fun ListWord(listWords: List<Word>){
 }
 
 @Composable
-fun ShowWord(word: Word){
+fun ShowWord(word: Word, changeItem: (Item) -> Unit, changeWord: (Word) -> Unit, changeState: (Boolean) -> Unit){
     val constraintsSet = ConstraintSet {
         val wordSet = createRefFor("word")
         val sound = createRefFor("sound")
         val speaker = createRefFor("speaker")
         val mean = createRefFor("mean")
+        val modifier = createRefFor("modifier")
 
         constrain(wordSet) {
             top.linkTo(parent.top, margin = 5.dp)
@@ -77,6 +81,11 @@ fun ShowWord(word: Word){
         constrain(speaker){
             top.linkTo(wordSet.bottom)
             end.linkTo(parent.end, margin = 50.dp)
+        }
+
+        constrain(modifier){
+            top.linkTo(wordSet.bottom)
+            end.linkTo(speaker.start, margin = 20.dp)
         }
 
         constrain(mean){
@@ -121,7 +130,17 @@ fun ShowWord(word: Word){
                     TextSpeech.speech?.speakOut(word.word)
                 }
         )
-
+        Icon(
+            imageVector = Icons.Filled.Edit,
+            contentDescription = "speaker",
+            modifier = Modifier.layoutId("modifier")
+                .clickable {
+                    changeItem(Item("Thêm Từ"))
+                    changeWord(word)
+                    changeState(false)
+                    TextSpeech.speech?.speakOut(word.word)
+                }
+        )
         Text(
             text = word.mean,
             modifier = Modifier.layoutId("mean")
@@ -129,8 +148,9 @@ fun ShowWord(word: Word){
     }
 }
 
+/*
 @Preview
 @Composable
 fun PreviewWord(){
     ShowWord(Word(1, "Hello", "N", "/helo/","Hello", "", "", 1))
-}
+}*/

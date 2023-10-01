@@ -12,4 +12,7 @@ interface TopicWordDao {
 
     @Query("DELETE FROM TopicWord WHERE idTopic = :idTopic")
     suspend fun deleteTopicWord(idTopic: Int)
+
+    @Query("DELETE FROM TopicWord")
+    suspend fun deleteAllTopicWord()
 }

@@ -31,6 +31,12 @@ fun ScreenWord(topicTitle: String, wordViewModel: WordViewModel, wordDao: WordDa
     wordViewModel.getAllWordsByTopic(wordDao, idTopic)
     val listWords by wordViewModel.listWords.collectAsState()
     val progress by wordViewModel.progressBar.collectAsState()
+    var state by remember{
+        mutableStateOf(true)
+    }
+    val word = remember{
+        mutableStateOf(Word(0, "", "", "", "", "", "", idTopic))
+    }
 
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -48,6 +54,10 @@ fun ScreenWord(topicTitle: String, wordViewModel: WordViewModel, wordDao: WordDa
                         selected = item == selectedItem,
                         onClick = {
                             scope.launch { drawerState.close() }
+                            if(item.nameItem == "Thêm Từ"){
+                                word.value = Word(0, "", "", "", "", "", "", idTopic)
+                                state = true
+                            }
                             selectedItem = item
                         },
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
@@ -99,7 +109,7 @@ fun ScreenWord(topicTitle: String, wordViewModel: WordViewModel, wordDao: WordDa
                             }
                         }
                         "Thêm Từ" -> {
-                            AddWordScreen(wordViewModel, wordDao, idTopic, topicWordDao)
+                            AddWordScreen(wordViewModel, wordDao, idTopic, topicWordDao, word.value, state)
                         }
                         "Xóa Nhiều Từ" -> {
                             DeleteWordScreen(listWords = listWords, wordViewModel, wordDao, idTopic) {
@@ -127,7 +137,7 @@ fun ScreenWord(topicTitle: String, wordViewModel: WordViewModel, wordDao: WordDa
                                 CircularProgressIndicator()
                             }
                             if(progress == 0) {
-                                ListWord(listWords = listWords)
+                                ListWord(listWords = listWords, {selectedItem = it},  {word.value = it}, {state = it})
                             }
                         }
                     }

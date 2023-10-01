@@ -23,8 +23,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.ImageLoader
+import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
-import coil.size.Size
 import com.example.mydictionary.*
 import com.example.mydictionary.R
 import com.example.mydictionary.database.table.Word
@@ -40,12 +40,14 @@ fun LearnWordScreen(listWords: List<Word>){
     ){
         ShowLearnWord(word = listWords[point])
         Row(Modifier.fillMaxWidth()){
-            Row(Modifier.weight(1f)
-                .clickable {
-                    if(point > 0){
-                        point--;
-                    }
-                },
+            Row(
+                Modifier
+                    .weight(1f)
+                    .clickable {
+                        if (point > 0) {
+                            point--;
+                        }
+                    },
                 horizontalArrangement = Arrangement.End) {
                 Icon(
                     imageVector = Icons.Filled.ArrowBack,
@@ -56,12 +58,14 @@ fun LearnWordScreen(listWords: List<Word>){
                 )
             }
             Spacer(modifier = Modifier.width(10.dp))
-            Row(Modifier.weight(1f)
-                .clickable {
-                    if(point < listWords.size - 1){
-                        point++;
-                    }
-                },
+            Row(
+                Modifier
+                    .weight(1f)
+                    .clickable {
+                        if (point < listWords.size - 1) {
+                            point++;
+                        }
+                    },
                 horizontalArrangement = Arrangement.Start) {
                 Icon(
                     imageVector = Icons.Filled.ArrowForward,
@@ -81,7 +85,6 @@ fun ShowLearnWord(word: Word){
         mutableStateOf(0)
     }
     Column(modifier = Modifier
-        .border(BorderStroke(2.dp, Color(0xFF08b42e)))
         .fillMaxWidth()
         .height((ScreenSizes.height() / 2 + 100).dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -100,7 +103,8 @@ fun ShowLearnWord(word: Word){
                 Icon(
                     painter = painterResource(id = R.drawable.small_speaker),
                     contentDescription = "speaker",
-                    modifier = Modifier.layoutId("speaker")
+                    modifier = Modifier
+                        .layoutId("speaker")
                         .clickable {
                             TextSpeech.speech?.speakOut(word.word)
                         }
@@ -120,7 +124,7 @@ fun ShowLearnWord(word: Word){
             )
         }else{
             Image(
-                painter = rememberAsyncImagePainter(
+                 rememberAsyncImagePainter(
                     Uri.parse(word.image),
                     ImageLoader(context = LocalContext.current)
                 ),
@@ -130,6 +134,10 @@ fun ShowLearnWord(word: Word){
                     .fillMaxWidth()
                     .height((ScreenSizes.height() / 2).dp)
                     .clip(RectangleShape)
+                    .border(
+                    BorderStroke(1.dp, Color.Gray),
+                    RectangleShape
+                ),
             )
             Spacer(modifier = Modifier.height(5.dp))
             Text(

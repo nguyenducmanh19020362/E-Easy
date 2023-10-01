@@ -85,4 +85,11 @@ class WordViewModel: ViewModel() {
             _progressBar.tryEmit(2)
         }
     }
+
+    fun updateWord(wordDao: WordDao, word: Word){
+        viewModelScope.launch (Dispatchers.IO){
+            wordDao.updateWord(word.id!!, word.word, word.type, word.pronounce, word.mean, word.example, word.image, word.id_topic)
+            _progressBar.tryEmit(2)
+        }
+    }
 }

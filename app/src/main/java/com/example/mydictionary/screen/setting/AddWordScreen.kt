@@ -46,8 +46,8 @@ import com.example.mydictionary.screen.ShowWord
 import com.example.mydictionary.viewmodels.WordViewModel
 
 @Composable
-fun AddWordScreen(wordViewModel: WordViewModel, wordDao: WordDao, idTopic: Int, topicWordDao: TopicWordDao){
-    Log.e("", idTopic.toString())
+fun AddWordScreen(wordViewModel: WordViewModel, wordDao: WordDao, idTopic: Int, topicWordDao: TopicWordDao,
+                  wordB: Word, state: Boolean){
     val listWordSearch by wordViewModel.wordSearch.collectAsState()
     
     var error by remember{
@@ -57,20 +57,24 @@ fun AddWordScreen(wordViewModel: WordViewModel, wordDao: WordDao, idTopic: Int, 
         mutableStateOf("")
     }
     var word by remember {
-        mutableStateOf("")
+        mutableStateOf(wordB.word)
     }
     var typeWord by remember {
-        mutableStateOf("")
+        mutableStateOf(wordB.type)
     }
     var mean by remember {
-        mutableStateOf("")
+        mutableStateOf(wordB.mean)
     }
     var example by remember {
-        mutableStateOf("")
+        mutableStateOf(wordB.example)
     }
     var uri by rememberSaveable {
         mutableStateOf(Uri.EMPTY)
     }
+    if(wordB.image != "" && uri == Uri.EMPTY){
+        uri = Uri.parse(wordB.image)
+    }
+
     val galleryLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uriList ->
             if (uriList.isNotEmpty()) {
@@ -79,12 +83,16 @@ fun AddWordScreen(wordViewModel: WordViewModel, wordDao: WordDao, idTopic: Int, 
         }
     
     val progress by wordViewModel.progressBar.collectAsState()
-    
+
     if(progress == 2){
+        var annotation = "Thêm từ thành công"
+        if(!state){
+            annotation = "Cập nhật thành công"
+        }
         AlertDialog(
             onDismissRequest = { wordViewModel.setProgressBar(0) },
             title = { Text(text = "Thông báo") },
-            text = { Text(text = "Thêm từ thành công") },
+            text = { Text(text = annotation) },
             confirmButton = {
                 TextButton(onClick = {
                     wordViewModel.setProgressBar(0)
@@ -186,21 +194,31 @@ fun AddWordScreen(wordViewModel: WordViewModel, wordDao: WordDao, idTopic: Int, 
                 Spacer(modifier = Modifier.height(20.dp))
                 Button(
                     onClick = {
-                        if(word == "" || mean == ""){
-                            error = 1
+                        if(state){
+                            if(word == "" || mean == ""){
+                                error = 1
+                            }else{
+                                wordViewModel.setProgressBar(1)
+                                val newWord = Word(null, word, typeWord, "", mean, example, uri.toString(), idTopic)
+                                wordViewModel.addWord(
+                                    wordDao,
+                                    topicWordDao,
+                                    newWord,
+                                )
+                            }
                         }else{
                             wordViewModel.setProgressBar(1)
-                            val newWord = Word(null, word, typeWord, "", mean, example, uri.toString(), idTopic)
-                            wordViewModel.addWord(
-                                wordDao,
-                                topicWordDao,
-                                newWord,
-                            )
+                            val newWord = Word(wordB.id, word, typeWord, wordB.pronounce, mean, example, uri.toString(), idTopic)
+                            wordViewModel.updateWord(wordDao, newWord)
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF08b42e))
                 ) {
-                    Text(text = "Thêm")
+                    if(state) {
+                        Text(text = "Thêm")
+                    }else{
+                        Text(text = "Sửa")
+                    }
                 }
             }
         }
@@ -235,7 +253,7 @@ fun FieldInput(type: String, text: String, changeText: (String) -> Unit, flag: B
 }
 
 @Composable
-fun ItemWord(content: String, topicWordDao: TopicWordDao, w: Word, wordViewModel: WordViewModel, idTopic: Int, resetSearch: () -> Unit,){
+fun ItemWord(content: String, topicWordDao: TopicWordDao, w: Word, wordViewModel: WordViewModel, idTopic: Int, resetSearch: () -> Unit){
     val constraints = ConstraintSet{
         val content1 = createRefFor("content")
         val button = createRefFor("button")

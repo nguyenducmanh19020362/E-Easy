@@ -29,6 +29,9 @@ import com.example.mydictionary.ui.theme.MyDictionaryTheme
 import com.example.mydictionary.viewmodels.HomeViewModel
 import com.example.mydictionary.viewmodels.TopicViewModel
 import com.example.mydictionary.viewmodels.WordViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
     private lateinit var myDictionaryDatabase: MyDictionaryDatabase
@@ -72,6 +75,12 @@ class MainActivity : ComponentActivity() {
                         topicWordDao = topicWordDao,
                         data
                     )
+                    /*runBlocking {
+                        withContext(Dispatchers.IO) {
+                            initData(wordDao, folderDao, topicDao, topicWordDao, applicationContext)
+                            //delete(wordDao, folderDao, topicDao, topicWordDao)
+                        }
+                    }*/
                 }
             }
         }
